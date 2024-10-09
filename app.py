@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 import requests
 import os
 from dotenv import load_dotenv
+from waitress import serve
 
 # Load environment variables
 load_dotenv()
@@ -52,4 +53,4 @@ def themed_index(theme):
     return index()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    serve(app, host='0.0.0.0', port=81)
