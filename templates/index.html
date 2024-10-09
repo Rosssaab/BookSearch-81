@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Search</title>
-    <link id="theme-link" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/{{ theme }}/bootstrap.min.css" rel="stylesheet">
+    <link id="theme-link" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/darkly/bootstrap.min.css" rel="stylesheet">
     <style>
         .modal-fullscreen {
             padding: 0 !important;
@@ -55,6 +55,14 @@
         #resetButton {
             white-space: nowrap;
         }
+        .read-more, .read-less {
+            color: #007bff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .read-more:hover, .read-less:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -63,7 +71,7 @@
             <a href="http://mywebstuff.co.uk:81" class="btn btn-secondary me-2">Back</a>
             <span class="navbar-brand mx-auto">Book Search</span>
             <select id="theme-select" class="form-select" style="width: auto;">
-                <option value="default">Default</option>
+                <option value="default">Default (Darkly)</option>
                 <option value="cerulean">Cerulean</option>
                 <option value="cosmo">Cosmo</option>
                 <option value="cyborg">Cyborg</option>
@@ -113,7 +121,7 @@
                 </div>
                 <div class="d-flex justify-content-between">
                     <button type="submit" class="btn btn-primary" id="searchButton">Search</button>
-                    <button type="button" class="btn btn-secondary" id="clearButton">Clear</button>
+                    <button type="button" class="btn btn-secondary" id="clearButton" style="display: none;">Clear</button>
                 </div>
             </form>
         </div>
@@ -122,28 +130,44 @@
     {% if books %}
         <div id="searchResults" class="container mt-5">
             <h2 class="mb-4">Search Results</h2>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="row">
                 {% for book in books %}
-                    <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            {% if book.volumeInfo.imageLinks %}
-                                <img src="{{ book.volumeInfo.imageLinks.thumbnail }}" class="card-img-top book-image" alt="{{ book.volumeInfo.title }}" style="object-fit: cover; height: 200px;" data-bs-toggle="modal" data-bs-target="#bookModal{{ loop.index }}">
-                            {% endif %}
-                            <div class="card-body">
-                                <h5 class="card-title">{{ book.volumeInfo.title }}</h5>
-                                <p class="card-text">
-                                    {% if book.volumeInfo.authors %}
-                                        <strong>Author(s):</strong> {{ book.volumeInfo.authors|join(', ') }}<br>
+                    <div class="col-12 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    {% if book.volumeInfo.imageLinks %}
+                                        <img src="{{ book.volumeInfo.imageLinks.thumbnail }}" class="img-fluid rounded-start book-image" alt="{{ book.volumeInfo.title }}" style="width: 100%; height: 300px; object-fit: cover;" data-bs-toggle="modal" data-bs-target="#bookModal{{ loop.index }}">
+                                    {% else %}
+                                        <div class="bg-secondary text-white d-flex justify-content-center align-items-center" style="height: 300px;">
+                                            <span>No Image Available</span>
+                                        </div>
                                     {% endif %}
-                                    {% if book.volumeInfo.publishedDate %}
-                                        <strong>Published:</strong> {{ book.volumeInfo.publishedDate }}<br>
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <div class="card-footer">
-                                {% if book.volumeInfo.infoLink %}
-                                    <a href="{{ book.volumeInfo.infoLink }}" class="btn btn-primary btn-sm w-100" target="_blank">More Info</a>
-                                {% endif %}
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ book.volumeInfo.title }}</h5>
+                                        <p class="card-text">
+                                            {% if book.volumeInfo.authors %}
+                                                <strong>Author(s):</strong> {{ book.volumeInfo.authors|join(', ') }}<br>
+                                            {% endif %}
+                                            {% if book.volumeInfo.publishedDate %}
+                                                <strong>Published:</strong> {{ book.volumeInfo.publishedDate }}<br>
+                                            {% endif %}
+                                        </p>
+                                        {% if book.volumeInfo.description %}
+                                            <p class="card-text">
+                                                <span class="short-description">{{ book.volumeInfo.description|truncate(200) }}</span>
+                                                <span class="full-description" style="display: none;">{{ book.volumeInfo.description }}</span>
+                                                <a href="#" class="read-more">Read more</a>
+                                                <a href="#" class="read-less" style="display: none;">Read less</a>
+                                            </p>
+                                        {% endif %}
+                                        {% if book.volumeInfo.infoLink %}
+                                            <a href="{{ book.volumeInfo.infoLink }}" class="btn btn-primary btn-sm" target="_blank">More Info</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -193,6 +217,7 @@
         var clearButton = document.getElementById('clearButton');
         var themeSelect = document.getElementById('theme-select');
         var themeLink = document.getElementById('theme-link');
+        var inputFields = document.querySelectorAll('#searchForm input[type="text"]');
 
         function showSearchForm() {
             searchContainer.classList.remove('collapsed');
@@ -241,13 +266,29 @@
             resetButton.addEventListener('click', showSearchForm);
         }
 
+        function toggleClearButton() {
+            var hasText = Array.from(inputFields).some(input => input.value.trim() !== '');
+            clearButton.style.display = hasText ? 'inline-block' : 'none';
+            
+            // Adjust the search button's position
+            searchButton.style.marginRight = hasText ? '10px' : '0';
+        }
+
+        inputFields.forEach(function(input) {
+            input.addEventListener('input', toggleClearButton);
+        });
+
         if (clearButton) {
             clearButton.addEventListener('click', function() {
-                document.getElementById('title').value = '';
-                document.getElementById('author').value = '';
-                document.getElementById('subject').value = '';
+                inputFields.forEach(function(input) {
+                    input.value = '';
+                });
+                toggleClearButton();
             });
         }
+
+        // Initial check
+        toggleClearButton();
 
         if (searchButton && clearButton) {
             var maxWidth = Math.max(searchButton.offsetWidth, clearButton.offsetWidth);
@@ -259,14 +300,38 @@
             themeSelect.addEventListener('change', function() {
                 var selectedTheme = this.value;
                 if (selectedTheme === 'default') {
-                    selectedTheme = 'quartz';
+                    selectedTheme = 'darkly';
                 }
                 themeLink.href = `https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/${selectedTheme}/bootstrap.min.css`;
             });
 
             var currentTheme = themeLink.href.split('/').slice(-2)[0];
-            themeSelect.value = currentTheme === 'quartz' ? 'default' : currentTheme;
+            themeSelect.value = currentTheme === 'darkly' ? 'default' : currentTheme;
         }
+
+        // Read more/less functionality
+        document.querySelectorAll('.read-more, .read-less').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var cardText = this.closest('.card-text');
+                var shortDesc = cardText.querySelector('.short-description');
+                var fullDesc = cardText.querySelector('.full-description');
+                var readMore = cardText.querySelector('.read-more');
+                var readLess = cardText.querySelector('.read-less');
+
+                if (this.classList.contains('read-more')) {
+                    shortDesc.style.display = 'none';
+                    fullDesc.style.display = 'inline';
+                    readMore.style.display = 'none';
+                    readLess.style.display = 'inline';
+                } else {
+                    shortDesc.style.display = 'inline';
+                    fullDesc.style.display = 'none';
+                    readMore.style.display = 'inline';
+                    readLess.style.display = 'none';
+                }
+            });
+        });
     });
 
     function attachModalCloseListeners() {
