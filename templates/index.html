@@ -171,12 +171,12 @@
                                             {% set isbn = book.volumeInfo.industryIdentifiers|selectattr("type", "equalto", "ISBN_10")|map(attribute="identifier")|first %}
                                         {% endif %}
                                         {% if isbn %}
-                                            <a href="https://www.amazon.com/s?isbn={{ isbn }}" class="btn btn-success btn-lg buy-button" target="_blank">Buy on Amazon</a>
+                                            <a href="https://www.amazon.co.uk/s?isbn={{ isbn }}" class="btn btn-success btn-lg buy-button" target="_blank">Buy on Amazon</a>
                                         {% else %}
-                                            <a href="https://www.amazon.com/s?k={{ book.volumeInfo.title|urlencode }}+{{ book.volumeInfo.authors[0]|default('')|urlencode }}" class="btn btn-success btn-lg buy-button" target="_blank">Search on Amazon</a>
+                                            <a href="https://www.amazon.co.uk/s?k={{ book.volumeInfo.title|urlencode }}+{{ book.volumeInfo.authors[0]|default('')|urlencode }}" class="btn btn-success btn-lg buy-button" target="_blank">Search on Amazon</a>
                                         {% endif %}
                                     {% else %}
-                                        <a href="https://www.amazon.com/s?k={{ book.volumeInfo.title|urlencode }}+{{ book.volumeInfo.authors[0]|default('')|urlencode }}" class="btn btn-success btn-lg buy-button" target="_blank">Search on Amazon</a>
+                                        <a href="https://www.amazon.co.uk/s?k={{ book.volumeInfo.title|urlencode }}+{{ book.volumeInfo.authors[0]|default('')|urlencode }}" class="btn btn-success btn-lg buy-button" target="_blank">Search on Amazon</a>
                                     {% endif %}
                                 </div>
                             </div>
