@@ -16,7 +16,7 @@ GOOGLE_BOOKS_API_KEY = os.getenv('GOOGLE_BOOKS_API_KEY')
 def index():
     books = []
     error = None
-    theme = request.args.get('theme', 'quartz')  # Default theme is quartz
+    theme = request.args.get('theme', 'minty')  # Default theme is now minty
 
     if request.method == 'POST':
         try:
@@ -53,4 +53,6 @@ def themed_index(theme):
     return index()
 
 if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=8080)
+    from waitress import serve
+    print("Starting server on http://localhost:8081")
+    serve(app, host='0.0.0.0', port=8081)
